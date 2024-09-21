@@ -24,6 +24,7 @@ body {
     width: 600px;
     font-size: 65px;
     text-align: right;
+    font-family: monospace;
 }
 
 .btn {
