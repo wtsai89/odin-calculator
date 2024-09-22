@@ -3,7 +3,7 @@ const display = document.querySelector("#display");
 
 function updateDisplay() {
     if (displayValue === null)
-        display.textContent = 0;
+        display.textContent = "0";
     else
         display.textContent = displayValue;
 }
@@ -14,11 +14,17 @@ let num1 = null;
 let num2 = null;
 let op = null;
 
+function toNum(value) {
+    if (value.includes("."))
+        return parseFloat(value);
+    return parseInt(value);
+}
+
 function pushNum(num) {
     if (displayValue === null)
-        displayValue = num;
-    else if(displayValue >= -9999999 && displayValue <= 99999999)
-        displayValue = displayValue * 10 + num;
+        displayValue = num.toString();
+    else if(displayValue.length <= 9)
+        displayValue = displayValue + num;
 
     updateDisplay();
 }
@@ -47,22 +53,46 @@ nine.addEventListener("click", () => pushNum(9));
 function operate() {
     switch (op) {
         case "add":
-            displayValue = num1 + num2;
+            num1 = num1 + num2;
             break;
         case "subtract":
-            displayValue = num1 - num2;
+            num1 = num1 - num2;
             break;
         case "multiply":
-            displayValue = num1 * num2;
+            num1 = num1 * num2;
             break;
         case "divide":
-            displayValue = num1 / num2;
+            if (num2 === 0) {
+                displayValue = "FAIL";
+                updateDisplay();
+                num1 = 0;
+                num2 = null;
+                op = null;
+                displayValue = null;
+                unHighlight();
+                return;
+            }
+            num1 = num1 / num2;
             break;
     }
-    num1 = displayValue;
+    displayValue = num1.toString();
+    displayValue = resize(displayValue)
+    if (isNaN(displayValue))
+    {
+        num1 = null;
+        op = null;
+    }
     num2 = null;
     updateDisplay();
     displayValue = null;
+}
+
+function resize(value) {
+    if ((!value.includes(".") && value.length > 9) || value.indexOf(".") > 9) {
+        return "OVERFLOW";
+    }
+    value = value.slice(0,9);
+    return value;
 }
 
 function unHighlight() {
@@ -73,12 +103,12 @@ function unHighlight() {
 }
 
 function pushOp(newOp) {
-    if (num1 === null) {
-        num1 = (displayValue === null) ? 0 : displayValue;
+    if (num1 === null || (op === null && displayValue != null)) {
+        num1 = (displayValue === null) ? 0 : toNum(displayValue);
         displayValue = null;
     }
     else if (num2 === null && displayValue != null) {
-        num2 = displayValue;
+        num2 = toNum(displayValue);
         operate();
     }
 
@@ -111,8 +141,9 @@ divide.addEventListener("click", () => pushOp("divide"));
 const equals = document.querySelector("#equals");
 equals.addEventListener("click", () => {
     if (num1 != null && displayValue != null) {
-        num2 = displayValue;
+        num2 = toNum(displayValue);
         operate();
+        op = null;
         unHighlight();
         //num1 = null;
     }
