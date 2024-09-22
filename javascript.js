@@ -21,6 +21,8 @@ function toNum(value) {
 }
 
 function pushNum(num) {
+    if (displayValue === null && num === 0)
+        return;
     if (displayValue === null)
         displayValue = num.toString();
     else if(displayValue.length < 9)
