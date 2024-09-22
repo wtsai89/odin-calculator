@@ -23,8 +23,26 @@ function toNum(value) {
 function pushNum(num) {
     if (displayValue === null)
         displayValue = num.toString();
-    else if(displayValue.length <= 9)
+    else if(displayValue.length < 9)
         displayValue = displayValue + num;
+
+    updateDisplay();
+}
+
+function pushDecimal() {
+    if (displayValue === null)
+        displayValue = "0.";
+    else if (!displayValue.includes(".") && displayValue.length < 9)
+        displayValue = displayValue + ".";
+
+    updateDisplay();
+}
+
+function pushDelete() {
+    if (displayValue != null)
+        displayValue = displayValue.slice(0,displayValue.length-1);
+    if (displayValue === "")
+        displayValue = null;
 
     updateDisplay();
 }
@@ -49,6 +67,10 @@ const eight = document.querySelector("#eight");
 eight.addEventListener("click", () => pushNum(8));
 const nine = document.querySelector("#nine");
 nine.addEventListener("click", () => pushNum(9));
+const dot = document.querySelector("#dot");
+dot.addEventListener("click", pushDecimal);
+const del = document.querySelector("#delete");
+del.addEventListener("click", pushDelete);
 
 function operate() {
     switch (op) {
@@ -130,6 +152,16 @@ function pushOp(newOp) {
     }
 }
 
+function pushEquals() {
+    if (num1 != null && displayValue != null) {
+        num2 = toNum(displayValue);
+        operate();
+        op = null;
+        unHighlight();
+        //num1 = null;
+    }
+}
+
 const add = document.querySelector("#add");
 add.addEventListener("click", () => pushOp("add"));
 const subtract = document.querySelector("#subtract");
@@ -139,15 +171,7 @@ multiply.addEventListener("click", () => pushOp("multiply"));
 const divide = document.querySelector("#divide");
 divide.addEventListener("click", () => pushOp("divide"));
 const equals = document.querySelector("#equals");
-equals.addEventListener("click", () => {
-    if (num1 != null && displayValue != null) {
-        num2 = toNum(displayValue);
-        operate();
-        op = null;
-        unHighlight();
-        //num1 = null;
-    }
-});
+equals.addEventListener("click", pushEquals);
 const clear = document.querySelector("#clear");
 clear.addEventListener("click", () => {
     num1 = null;
@@ -158,7 +182,26 @@ clear.addEventListener("click", () => {
     updateDisplay();
 })
 
-flashBtns = [zero, one, two, three, four, five, six, seven, eight, nine, clear, equals];
+const dict = {
+    '+': "add",
+    '-': "subtract",
+    '*': "multiply",
+    '/': "divide",
+}
+window.addEventListener("keydown", event => {
+    if (['1','2','3','4','5','6','7','8','9','0'].includes(event.key))
+        pushNum(parseInt(event.key));
+    else if (['+','-','*','/'].includes(event.key))
+        pushOp(dict[event.key]);
+    else if (event.key === "=")
+        pushEquals();
+    else if (event.key === "Delete" || event.key === "Backspace")
+        pushDelete();
+    else if (event.key === ".")
+        pushDecimal();
+})
+
+flashBtns = [zero, one, two, three, four, five, six, seven, eight, nine, clear, equals, dot, del];
 for (const item of flashBtns) {
     item.addEventListener("mousedown", () => {
         item.setAttribute("style", "filter: brightness(2);");
